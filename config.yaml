@@ -1,19 +1,26 @@
 receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: localhost:55680
+  prometheus:
+    config:
+      scrape_configs:
+      - job_name: 'node-exporter'
+        scrape_interval: 5s
+        static_configs:
+        - targets: ['localhost:9100']
 
 processors:
 
 exporters:
+  stackdriver:
+    project: your-gcp-project
+    number_of_workers: 3
+    metric:
+      # prefix: custom.googleapis.com/opencensus/
+      skip_create_descriptor: true
   logging:
 
 service:
   pipelines:
-    traces:
-      receivers:
-        - otlp
+    metrics:
+      receivers: [prometheus]
       processors: []
-      exporters:
-        - logging
+      exporters: [stackdriver, logging]
